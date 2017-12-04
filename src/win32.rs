@@ -2,17 +2,30 @@ use std;
 use libc;
 use widestring::WideCString;
 
-use std::ptr::null_mut;
-
 pub const WS_TILED   : u32 = 0x00000000;
 pub const WS_VISIBLE : u32 = 0x10000000;
+pub const PM_REMOVE  : u32 = 0x0001;
 
+pub const WM_DESTROY : u32 = 0x0002;
+pub const WM_QUIT    : u32 = 0x0012;
+pub const WM_PAINT   : u32 = 0x0F;
+
+pub const CS_VREDRAW : u32 = 0x0001;
+pub const CS_HREDRAW : u32 = 0x0002;
+pub const CS_OWNDC   : u32 = 0x0020;
+
+
+pub const COLOR_WINDOW : u32 = 5;
+
+pub type VOID      = std::os::raw::c_void;
 pub type LPVOID    = *mut std::os::raw::c_void;
 pub type PVOID     = LPVOID;
 pub type HANDLE    = PVOID;
 pub type HWND      = HANDLE;
 pub type HMENU     = HANDLE;
 pub type HINSTANCE = HANDLE;
+pub type HDC       = HANDLE;
+pub type HMODULE   = HANDLE;
 pub type HICON     = HANDLE;
 pub type HCURSOR   = HANDLE;
 pub type HBRUSH    = HANDLE;
@@ -20,9 +33,11 @@ pub type HBRUSH    = HANDLE;
 pub type WORD  = u16;
 pub type DWORD = u32;
 
-pub type BOOL  = i32;
-pub type UINT  = u32;
-pub type INT   = u32;
+pub type BOOL = i32;
+pub type BYTE = u8;
+pub type UINT = u32;
+pub type INT  = u32;
+pub type LONG = u32;
 
 pub type ATOM = WORD;
 
@@ -80,6 +95,42 @@ impl Default for WNDCLASS {
     }
 }
 
+#[repr(C)]
+pub struct MSG {
+    pub hwnd:    HWND,
+    pub message: UINT,
+    pub wParam:  WPARAM,
+    pub lParam:  LPARAM,
+    pub time:    DWORD,
+    pub pt:      POINT
+}
+pub type LPMSG = *mut MSG;
+
+#[repr(C)]
+pub struct POINT {
+    pub x : LONG,
+    pub y : LONG
+}
+
+#[repr(C)]
+pub struct PAINTSTRUCT {
+    pub hdc         : HDC,
+    pub fErase      : BOOL,
+    pub rcPaint     : RECT,
+    pub fRestore    : BOOL,
+    pub fIncUpdate  : BOOL,
+    pub rgbReserved : [BYTE;32]
+}
+pub type LPPAINTSTRUCT = *mut PAINTSTRUCT;
+
+#[repr(C)]
+pub struct RECT {
+    left   : LONG,
+    top    : LONG,
+    right  : LONG,
+    bottom : LONG
+}
+
 #[link(name = "user32")]
 extern  {
     pub fn CreateWindowExW(
@@ -97,4 +148,27 @@ extern  {
         lpParam      : LPVOID) -> HWND;
 
     pub fn RegisterClassW(lpWndClass : *const WNDCLASS) -> ATOM;
+    pub fn GetModuleHandleW(lpModuleName : LPCWSTR) -> HMODULE;
+
+    pub fn PeekMessageW(
+        lpMsg         : LPMSG,
+        hWnd          : HWND,
+        wMsgFilterMin : UINT,
+        wMsgFilterMax : UINT,
+        wRemoveMsg    : UINT) -> BOOL;
+
+   pub fn TranslateMessage(lpMsg : *const MSG) -> BOOL;
+   pub fn DispatchMessageW(lpMsg : *const MSG) -> LRESULT;
+
+   pub fn PostQuitMessage(nExitCode : INT) -> VOID;
+
+   pub fn DefWindowProcW(
+       hWnd   : HWND,
+       Msg    : UINT,
+       wParam : WPARAM,
+       lParam : LPARAM) -> LRESULT;
+
+   pub fn BeginPaint(hwnd : HWND, lpPaint : LPPAINTSTRUCT) -> HDC;
+   pub fn EndPaint(hWnd : HWND, lpaint : *const PAINTSTRUCT) -> BOOL;
+   pub fn FillRect(hDC : HDC, lprc : *const RECT, hbr : HBRUSH) -> INT;
 }
