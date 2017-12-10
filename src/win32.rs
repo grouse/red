@@ -136,6 +136,37 @@ pub struct RECT {
     bottom : LONG
 }
 
+#[repr(C)]
+pub struct PIXELFORMATDESCRIPTOR {
+  nSize           : WORD,
+  nVersion        : WORD,
+  dwFlags         : DWORD,
+  iPixelType      : BYTE,
+  cColorBits      : BYTE,
+  cRedBits        : BYTE,
+  cRedShift       : BYTE,
+  cGreenBits      : BYTE,
+  cGreenShift     : BYTE,
+  cBlueBits       : BYTE,
+  cBlueShift      : BYTE,
+  cAlphaBits      : BYTE,
+  cAlphaShift     : BYTE,
+  cAccumBits      : BYTE,
+  cAccumRedBits   : BYTE,
+  cAccumGreenBits : BYTE,
+  cAccumBlueBits  : BYTE,
+  cAccumAlphaBits : BYTE,
+  cDepthBits      : BYTE,
+  cStencilBits    : BYTE,
+  cAuxBuffers     : BYTE,
+  iLayerType      : BYTE,
+  bReserved       : BYTE,
+  dwLayerMask     : DWORD,
+  dwVisibleMask   : DWORD,
+  dwDamageMask    : DWORD
+}
+pub type PPIXELFORMATDESCRIPTOR = *mut PIXELFORMATDESCRIPTOR;
+
 #[link(name = "user32")]
 extern  {
     pub fn CreateWindowExW(
