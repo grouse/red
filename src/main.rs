@@ -4,8 +4,10 @@ extern crate libc;
 extern crate widestring;
 
 use std::ptr::null_mut;
+use std::mem::size_of;
 
-pub mod win32;
+mod win32;
+mod opengl;
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -69,6 +71,37 @@ fn main()
             null_mut(),
             hinst,
             null_mut());
+
+        let hdc = win32::GetDC(hwnd);
+
+        let pfd = win32::PIXELFORMATDESCRIPTOR {
+            dwFlags : win32::PFD_DOUBLEBUFFER |
+                      win32::PFD_DRAW_TO_WINDOW |
+                      win32::PFD_SUPPORT_OPENGL,
+            iPixelType   : win32::PFD_TYPE_RGBA,
+            cColorBits   : 32,
+            cDepthBits   : 24,
+            cStencilBits : 8,
+            iLayerType   : win32::PFD_MAIN_PLANE,
+            ..Default::default()
+        };
+
+        let pf = win32::ChoosePixelFormat(hdc, &pfd);
+        assert!(pf != 0);
+
+        let result = win32::SetPixelFormat(hdc, pf, &pfd);
+        assert!(result == win32::TRUE);
+
+        let hglrc = opengl::wglCreateContext(hdc);
+        opengl::wglMakeCurrent(hdc, hglrc);
+
+        opengl::wglChoosePixelFormatARB =
+            std::mem::transmute::<
+                opengl::GLPROC,
+                opengl::wglChoosePixelFormatARB_t>(
+                    opengl::wglGetProcAddress(
+                        win32::wide_string("wglChoosePixelFormatARB")));
+
     }
 
     println!("hello world!");

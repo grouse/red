@@ -2,23 +2,31 @@ use std;
 use libc;
 use widestring::WideCString;
 
-pub const WS_TILED:       u32 = 0x00000000;
-pub const WS_VISIBLE:     u32 = 0x10000000;
-pub const WS_MINIMIZEBOX: u32 = 0x00020000;
-pub const WS_MAXIMIZEBOX: u32 = 0x00010000;
-pub const WS_SYSMENU:     u32 = 0x00080000;
+pub const WS_TILED       : u32 = 0x00000000;
+pub const WS_VISIBLE     : u32 = 0x10000000;
+pub const WS_MINIMIZEBOX : u32 = 0x00020000;
+pub const WS_MAXIMIZEBOX : u32 = 0x00010000;
+pub const WS_SYSMENU     : u32 = 0x00080000;
 
-pub const PM_REMOVE  : u32 = 0x0001;
+pub const PM_REMOVE : u32 = 0x0001;
 
-pub const WM_DESTROY: u32 = 0x0002;
-pub const WM_QUIT:    u32 = 0x0012;
-pub const WM_CLOSE:   u32 = 0x0010;
-pub const WM_PAINT:   u32 = 0x0F;
+pub const WM_DESTROY : u32 = 0x0002;
+pub const WM_QUIT    : u32 = 0x0012;
+pub const WM_CLOSE   : u32 = 0x0010;
+pub const WM_PAINT   : u32 = 0x0F;
 
 pub const CS_VREDRAW : u32 = 0x0001;
 pub const CS_HREDRAW : u32 = 0x0002;
 pub const CS_OWNDC   : u32 = 0x0020;
 
+pub const PFD_TYPE_RGBA       : u8 = 0;
+pub const PFD_TYPE_COLORINDEX : u8 = 1;
+
+pub const PFD_MAIN_PLANE : u8 = 0;
+
+pub const PFD_DOUBLEBUFFER    : u32 = 0x00000001;
+pub const PFD_DRAW_TO_WINDOW  : u32 = 0x00000004;
+pub const PFD_SUPPORT_OPENGL  : u32 = 0x00000020;
 
 pub const COLOR_WINDOW : u32 = 5;
 
@@ -39,6 +47,11 @@ pub type WORD  = u16;
 pub type DWORD = u32;
 
 pub type BOOL = i32;
+pub const TRUE  : i32 = 1;
+pub const FALSE : i32 = 0;
+
+pub type FLOAT = f32;
+
 pub type BYTE = u8;
 pub type UINT = u32;
 pub type INT  = u32;
@@ -57,17 +70,19 @@ pub type LRESULT = LONG_PTR;
 pub type LPCWSTR   = *const u16;
 pub type LPWSTR   =  *mut   u16;
 
-pub fn wide_string(s : &str) -> LPWSTR
-{
-    return WideCString::from_str(s).unwrap().into_raw();
-}
-
+pub enum OpaqueFunction {}
+pub type PROC = *mut OpaqueFunction;
 
 type WNDPROC = unsafe extern fn (
     hwnd   : HWND,
     uMsg   : UINT,
     wParam : WPARAM,
     lParam : LPARAM) -> LRESULT;
+
+pub fn wide_string(s : &str) -> LPWSTR
+{
+    return WideCString::from_str(s).unwrap().into_raw();
+}
 
 #[repr(C)]
 pub struct WNDCLASS {
@@ -138,34 +153,67 @@ pub struct RECT {
 
 #[repr(C)]
 pub struct PIXELFORMATDESCRIPTOR {
-  nSize           : WORD,
-  nVersion        : WORD,
-  dwFlags         : DWORD,
-  iPixelType      : BYTE,
-  cColorBits      : BYTE,
-  cRedBits        : BYTE,
-  cRedShift       : BYTE,
-  cGreenBits      : BYTE,
-  cGreenShift     : BYTE,
-  cBlueBits       : BYTE,
-  cBlueShift      : BYTE,
-  cAlphaBits      : BYTE,
-  cAlphaShift     : BYTE,
-  cAccumBits      : BYTE,
-  cAccumRedBits   : BYTE,
-  cAccumGreenBits : BYTE,
-  cAccumBlueBits  : BYTE,
-  cAccumAlphaBits : BYTE,
-  cDepthBits      : BYTE,
-  cStencilBits    : BYTE,
-  cAuxBuffers     : BYTE,
-  iLayerType      : BYTE,
-  bReserved       : BYTE,
-  dwLayerMask     : DWORD,
-  dwVisibleMask   : DWORD,
-  dwDamageMask    : DWORD
+  pub nSize           : WORD,
+  pub nVersion        : WORD,
+  pub dwFlags         : DWORD,
+  pub iPixelType      : BYTE,
+  pub cColorBits      : BYTE,
+  pub cRedBits        : BYTE,
+  pub cRedShift       : BYTE,
+  pub cGreenBits      : BYTE,
+  pub cGreenShift     : BYTE,
+  pub cBlueBits       : BYTE,
+  pub cBlueShift      : BYTE,
+  pub cAlphaBits      : BYTE,
+  pub cAlphaShift     : BYTE,
+  pub cAccumBits      : BYTE,
+  pub cAccumRedBits   : BYTE,
+  pub cAccumGreenBits : BYTE,
+  pub cAccumBlueBits  : BYTE,
+  pub cAccumAlphaBits : BYTE,
+  pub cDepthBits      : BYTE,
+  pub cStencilBits    : BYTE,
+  pub cAuxBuffers     : BYTE,
+  pub iLayerType      : BYTE,
+  pub bReserved       : BYTE,
+  pub dwLayerMask     : DWORD,
+  pub dwVisibleMask   : DWORD,
+  pub dwDamageMask    : DWORD
 }
 pub type PPIXELFORMATDESCRIPTOR = *mut PIXELFORMATDESCRIPTOR;
+
+impl Default for PIXELFORMATDESCRIPTOR {
+    fn default() -> PIXELFORMATDESCRIPTOR {
+        PIXELFORMATDESCRIPTOR {
+            nSize           : std::mem::size_of::<PIXELFORMATDESCRIPTOR>() as WORD,
+            nVersion        : 1,
+            dwFlags         : 0,
+            iPixelType      : 0,
+            cColorBits      : 0,
+            cRedBits        : 0,
+            cRedShift       : 0,
+            cGreenBits      : 0,
+            cGreenShift     : 0,
+            cBlueBits       : 0,
+            cBlueShift      : 0,
+            cAlphaBits      : 0,
+            cAlphaShift     : 0,
+            cAccumBits      : 0,
+            cAccumRedBits   : 0,
+            cAccumGreenBits : 0,
+            cAccumBlueBits  : 0,
+            cAccumAlphaBits : 0,
+            cDepthBits      : 0,
+            cStencilBits    : 0,
+            cAuxBuffers     : 0,
+            iLayerType      : 0,
+            bReserved       : 0,
+            dwLayerMask     : 0,
+            dwVisibleMask   : 0,
+            dwDamageMask    : 0
+        }
+    }
+}
 
 #[link(name = "user32")]
 extern  {
@@ -207,4 +255,15 @@ extern  {
    pub fn BeginPaint(hwnd : HWND, lpPaint : LPPAINTSTRUCT) -> HDC;
    pub fn EndPaint(hWnd : HWND, lpaint : *const PAINTSTRUCT) -> BOOL;
    pub fn FillRect(hDC : HDC, lprc : *const RECT, hbr : HBRUSH) -> INT;
+
+   pub fn GetDC(hwnd : HWND) -> HDC;
+}
+
+#[link(name = "gdi32")]
+extern {
+   pub fn ChoosePixelFormat(hdc : HDC, ppfd : *const PIXELFORMATDESCRIPTOR) -> INT;
+   pub fn SetPixelFormat(
+       hdc : HDC,
+       iPixelFormat : INT,
+       ppfd : *const PIXELFORMATDESCRIPTOR) -> BOOL;
 }
