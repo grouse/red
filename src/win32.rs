@@ -2,13 +2,18 @@ use std;
 use libc;
 use widestring::WideCString;
 
-pub const WS_TILED   : u32 = 0x00000000;
-pub const WS_VISIBLE : u32 = 0x10000000;
+pub const WS_TILED:       u32 = 0x00000000;
+pub const WS_VISIBLE:     u32 = 0x10000000;
+pub const WS_MINIMIZEBOX: u32 = 0x00020000;
+pub const WS_MAXIMIZEBOX: u32 = 0x00010000;
+pub const WS_SYSMENU:     u32 = 0x00080000;
+
 pub const PM_REMOVE  : u32 = 0x0001;
 
-pub const WM_DESTROY : u32 = 0x0002;
-pub const WM_QUIT    : u32 = 0x0012;
-pub const WM_PAINT   : u32 = 0x0F;
+pub const WM_DESTROY: u32 = 0x0002;
+pub const WM_QUIT:    u32 = 0x0012;
+pub const WM_CLOSE:   u32 = 0x0010;
+pub const WM_PAINT:   u32 = 0x0F;
 
 pub const CS_VREDRAW : u32 = 0x0001;
 pub const CS_HREDRAW : u32 = 0x0002;

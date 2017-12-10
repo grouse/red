@@ -5,7 +5,7 @@ extern crate widestring;
 
 use std::ptr::null_mut;
 
-mod win32;
+pub mod win32;
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -14,6 +14,8 @@ pub unsafe extern fn window_proc(
     lparam : win32::LPARAM) -> win32::LRESULT
 {
     match msg {
+        win32::WM_QUIT => std::process::exit(0),
+        win32::WM_CLOSE => std::process::exit(0),
         win32::WM_DESTROY => {
             win32::PostQuitMessage(0);
         }
@@ -52,11 +54,15 @@ fn main()
 
         win32::RegisterClassW(&wc);
 
+        let dwstyle : u32 =
+            win32::WS_TILED | win32::WS_VISIBLE |
+            win32::WS_MINIMIZEBOX | win32::WS_MAXIMIZEBOX | win32::WS_SYSMENU;
+
         hwnd = win32::CreateWindowExW(
             0,
             class_name,
             class_name,
-            win32::WS_TILED | win32::WS_VISIBLE,
+            dwstyle,
             0, 0,
             1280, 720,
             null_mut(),
@@ -79,11 +85,5 @@ fn main()
                 win32::DispatchMessageW(&mut msg);
             }
         }
-
-        if msg.message == win32::WM_QUIT {
-            println!("good bye world!");
-            std::process::exit(0);
-        }
-
     }
 }
