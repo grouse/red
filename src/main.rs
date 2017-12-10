@@ -7,7 +7,7 @@ use std::ptr::null_mut;
 use std::mem::size_of;
 
 mod win32;
-mod opengl;
+mod wgl;
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -92,14 +92,14 @@ fn main()
         let result = win32::SetPixelFormat(hdc, pf, &pfd);
         assert!(result == win32::TRUE);
 
-        let hglrc = opengl::wglCreateContext(hdc);
-        opengl::wglMakeCurrent(hdc, hglrc);
+        let hglrc = wgl::CreateContext(hdc);
+        wgl::MakeCurrent(hdc, hglrc);
 
-        opengl::wglChoosePixelFormatARB =
+        wgl::ChoosePixelFormatARB =
             std::mem::transmute::<
-                opengl::GLPROC,
-                opengl::wglChoosePixelFormatARB_t>(
-                    opengl::wglGetProcAddress(
+                wgl::GLPROC,
+                wgl::ChoosePixelFormatARB_t>(
+                    wgl::GetProcAddress(
                         win32::wide_string("wglChoosePixelFormatARB")));
 
     }
