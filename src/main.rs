@@ -1,10 +1,12 @@
 #![windows_subsystem = "windows"]
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
 
 extern crate libc;
 extern crate widestring;
 
 use std::ptr::null_mut;
-use std::mem::size_of;
 
 mod win32;
 mod wgl;

@@ -27,6 +27,7 @@ pub type ChoosePixelFormatARB_t = unsafe extern fn(
     piFormats : *mut win32::INT,
     nNumFormats : *mut win32::UINT) -> win32::BOOL;
 
+#[allow(unused_variables)]
 unsafe extern fn ChoosePixelFormatARB_stub(
     hdc : win32::HDC,
     piAttribIList : *const win32::INT,
