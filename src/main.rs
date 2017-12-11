@@ -100,7 +100,8 @@ fn main()
         assert!(result != win32::FALSE);
 
         glcontext = wgl::CreateContext(hdc);
-        wgl::MakeCurrent(hdc, glcontext);
+        let result = wgl::MakeCurrent(hdc, glcontext);
+        assert!(result != win32::FALSE);
 
         wgl::ChoosePixelFormatARB = wglGetProcAddress!(
             "wglChoosePixelFormatARB",

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use win32;
 
 pub enum GLRC {}
