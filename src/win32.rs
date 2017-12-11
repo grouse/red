@@ -56,7 +56,7 @@ pub type FLOAT = f32;
 
 pub type BYTE = u8;
 pub type UINT = u32;
-pub type INT  = u32;
+pub type INT  = i32;
 pub type LONG = u32;
 
 pub type ATOM = WORD;
@@ -232,6 +232,8 @@ extern  {
         hMenu        : HMENU,
         hInstance    : HINSTANCE,
         lpParam      : LPVOID) -> HWND;
+
+    pub fn DestroyWindow(hWnd : HWND) -> BOOL;
 
     pub fn RegisterClassW(lpWndClass : *const WNDCLASS) -> ATOM;
     pub fn GetModuleHandleW(lpModuleName : LPCWSTR) -> HMODULE;

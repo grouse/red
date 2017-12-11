@@ -9,7 +9,9 @@ extern crate widestring;
 use std::ptr::null_mut;
 
 mod win32;
+#[macro_use]
 mod wgl;
+mod gl;
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -40,6 +42,7 @@ pub unsafe extern fn window_proc(
     return 0;
 }
 
+
 fn main()
 {
     let class_name = win32::wide_string("red");
@@ -51,7 +54,9 @@ fn main()
     };
 
     let hinst : win32::HINSTANCE;
-    let hwnd  : win32::HWND;
+    let mut hwnd      : win32::HWND;
+    let mut hdc       : win32::HDC;
+    let mut glcontext : wgl::HGLRC;
 
     unsafe {
         hinst = win32::GetModuleHandleW(null_mut());
@@ -74,7 +79,7 @@ fn main()
             hinst,
             null_mut());
 
-        let hdc = win32::GetDC(hwnd);
+        hdc = win32::GetDC(hwnd);
 
         let pfd = win32::PIXELFORMATDESCRIPTOR {
             dwFlags : win32::PFD_DOUBLEBUFFER |
@@ -82,8 +87,8 @@ fn main()
                       win32::PFD_SUPPORT_OPENGL,
             iPixelType   : win32::PFD_TYPE_RGBA,
             cColorBits   : 32,
-            cDepthBits   : 24,
-            cStencilBits : 8,
+            cDepthBits   : 0,
+            cStencilBits : 0,
             iLayerType   : win32::PFD_MAIN_PLANE,
             ..Default::default()
         };
@@ -92,17 +97,56 @@ fn main()
         assert!(pf != 0);
 
         let result = win32::SetPixelFormat(hdc, pf, &pfd);
-        assert!(result == win32::TRUE);
+        assert!(result != win32::FALSE);
 
-        let hglrc = wgl::CreateContext(hdc);
-        wgl::MakeCurrent(hdc, hglrc);
+        glcontext = wgl::CreateContext(hdc);
+        wgl::MakeCurrent(hdc, glcontext);
 
-        wgl::ChoosePixelFormatARB =
-            std::mem::transmute::<
-                wgl::GLPROC,
-                wgl::ChoosePixelFormatARB_t>(
-                    wgl::GetProcAddress(
-                        win32::wide_string("wglChoosePixelFormatARB")));
+        wgl::ChoosePixelFormatARB = wglGetProcAddress!(
+            "wglChoosePixelFormatARB",
+            wgl::ChoosePixelFormatARB_t);
+
+        let attributes = [
+            wgl::DRAW_TO_WINDOW_ARB, gl::TRUE,
+            wgl::SUPPORT_OPENGL_ARB, gl::TRUE,
+            wgl::DOUBLE_BUFFER_ARB,  gl::TRUE,
+            wgl::PIXEL_TYPE_ARB,     wgl::TYPE_RGBA_ARB,
+            wgl::COLOR_BITS_ARB,     32,
+            wgl::DEPTH_BITS_ARB,     0,
+            wgl::STENCIL_BITS_ARB,   0,
+            0,        //End
+        ];
+
+        let mut format   : i32         = std::mem::uninitialized();
+        let mut nformats : win32::UINT = std::mem::uninitialized();
+        let result = wgl::ChoosePixelFormatARB(
+            hdc, &attributes[0], null_mut(), 1, &mut format, &mut nformats);
+        assert!(result != win32::FALSE);
+
+        if format != pf {
+            wgl::DeleteContext(glcontext);
+            win32::DestroyWindow(hwnd);
+
+            hwnd = win32::CreateWindowExW(
+                0,
+                class_name,
+                class_name,
+                dwstyle,
+                0, 0,
+                1280, 720,
+                null_mut(),
+                null_mut(),
+                hinst,
+                null_mut());
+
+            hdc = win32::GetDC(hwnd);
+
+            let result = win32::SetPixelFormat(hdc, format, &pfd);
+            assert!(result != win32::FALSE);
+
+            glcontext = wgl::CreateContext(hdc);
+            wgl::MakeCurrent(hdc, glcontext);
+        }
 
     }
 
