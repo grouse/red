@@ -1,4 +1,3 @@
-#![windows_subsystem = "windows"]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
@@ -6,7 +5,6 @@
 extern crate libc;
 extern crate widestring;
 
-use std::ffi::CString;
 use std::ptr::null_mut;
 
 mod win32;
@@ -108,6 +106,10 @@ fn main()
             "wglChoosePixelFormatARB",
             wgl::ChoosePixelFormatARB_t);
 
+        wgl::CreateContextAttribsARB = wglGetProcAddress!(
+            "wglCreateContextAttribsARB",
+            wgl::CreateContextAttribsARB_t);
+
         let attributes = [
             wgl::DRAW_TO_WINDOW_ARB, gl::TRUE,
             wgl::SUPPORT_OPENGL_ARB, gl::TRUE,
@@ -146,8 +148,35 @@ fn main()
             let result = win32::SetPixelFormat(hdc, format, &pfd);
             assert!(result != win32::FALSE);
 
-            glcontext = wgl::CreateContext(hdc);
-            wgl::MakeCurrent(hdc, glcontext);
+            let tmp_context = wgl::CreateContext(hdc);
+            let result = wgl::MakeCurrent(hdc, tmp_context);
+            assert!(result != win32::FALSE);
+
+            let result = wgl::MakeCurrent(hdc, tmp_context);
+            assert!(result != win32::FALSE);
+
+            let attributes = [
+                wgl::CONTEXT_MAJOR_VERSION_ARB, 3,
+                wgl::CONTEXT_MINOR_VERSION_ARB, 2,
+                wgl::CONTEXT_FLAGS_ARB, wgl::CONTEXT_DEBUG_BIT_ARB,
+                //wgl::CONTEXT_PROFILE_MASK_ARB, wgl::CONTEXT_CORE_PROFILE_BIT_ARB,
+                0
+            ];
+
+            glcontext = wgl::CreateContextAttribsARB(hdc, null_mut(), &attributes[0]);
+            wgl::MakeCurrent(null_mut(), null_mut());
+            wgl::DeleteContext(tmp_context);
+
+            let result = wgl::MakeCurrent(hdc, glcontext);
+            assert!(result != win32::FALSE);
+
+            let mut major : i32 = std::mem::uninitialized();
+            let mut minor : i32 = std::mem::uninitialized();
+
+            gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
+            gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
+
+            println!("OpenGL version {}.{}", major, minor);
         }
 
     }

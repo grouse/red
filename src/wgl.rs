@@ -29,6 +29,7 @@ extern {
 
 
 //// extension: WGL_ARB_pixel_format
+// functions
 pub static mut ChoosePixelFormatARB : ChoosePixelFormatARB_t = ChoosePixelFormatARB_stub;
 
 pub type ChoosePixelFormatARB_t = unsafe extern fn(
@@ -103,6 +104,43 @@ pub const SWAP_COPY_ARB            : i32 = 0x2029;
 pub const SWAP_UNDEFINED_ARB       : i32 = 0x202A;
 pub const TYPE_RGBA_ARB            : i32 = 0x202B;
 pub const TYPE_COLORINDEX_ARB      : i32 = 0x202C;
+
+
+//// extension: WGL_ARB_create_context
+// functions
+pub type CreateContextAttribsARB_t = unsafe extern fn (
+    hDC : win32::HDC,
+    hShareContext : HGLRC,
+    attribList : *const i32) -> HGLRC;
+
+#[allow(unused_variables)]
+unsafe extern fn CreateContextAttribsARB_stub(
+    hDC : win32::HDC,
+    hShareContext : HGLRC,
+    attribList : *const i32) -> HGLRC
+{
+    unimplemented!();
+}
+
+pub static mut CreateContextAttribsARB : CreateContextAttribsARB_t = CreateContextAttribsARB_stub;
+
+// attributes
+pub const CONTEXT_MAJOR_VERSION_ARB : i32 = 0x2091;
+pub const CONTEXT_MINOR_VERSION_ARB : i32 = 0x2092;
+pub const CONTEXT_LAYER_PLANE_ARB   : i32 = 0x2093;
+pub const CONTEXT_FLAGS_ARB         : i32 = 0x2094;
+pub const CONTEXT_PROFILE_MASK_ARB  : i32 = 0x9126;
+
+// attribute bits
+pub const CONTEXT_DEBUG_BIT_ARB                 : i32 = 0x0001;
+pub const CONTEXT_FORWARD_COMPATIBLE_BIT_ARB    : i32 = 0x0002;
+pub const CONTEXT_CORE_PROFILE_BIT_ARB          : i32 = 0x00000001;
+pub const CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB : i32 = 0x00000002;
+
+// errors
+pub const ERROR_INVALID_VERSION_ARB : i32 = 0x2095;
+pub const ERROR_INVALID_PROFILE_ARB : i32 = 0x2096;
+
 
 #[macro_export]
 macro_rules! wglGetProcAddress {
