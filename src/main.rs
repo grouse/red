@@ -6,6 +6,7 @@
 extern crate libc;
 extern crate widestring;
 
+use std::ffi::CString;
 use std::ptr::null_mut;
 
 mod win32;

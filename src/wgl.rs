@@ -21,7 +21,7 @@ extern {
     pub fn MakeCurrent(hdc : win32::HDC, hglrc : HGLRC) -> win32::BOOL;
 
     #[link_name = "wglGetProcAddress"]
-    pub fn GetProcAddress(lpszProc : win32::LPCWSTR) -> GLPROC;
+    pub fn GetProcAddress(lpszProc : win32::LPCSTR) -> GLPROC;
 }
 
 
@@ -104,11 +104,10 @@ pub const SWAP_UNDEFINED_ARB       : i32 = 0x202A;
 pub const TYPE_RGBA_ARB            : i32 = 0x202B;
 pub const TYPE_COLORINDEX_ARB      : i32 = 0x202C;
 
-
 #[macro_export]
 macro_rules! wglGetProcAddress {
     ($n:expr, $t:ty) => {
-        std::mem::transmute::<wgl::GLPROC, $t>(wgl::GetProcAddress(win32::wide_string($n)));
+        std::mem::transmute::<wgl::GLPROC, $t>(wgl::GetProcAddress(std::ffi::CString::new($n).unwrap().as_ptr()));
     }
 }
 

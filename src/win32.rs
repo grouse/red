@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std;
+use std::os::raw::c_char;
 use libc;
 use widestring::WideCString;
 
@@ -69,8 +70,9 @@ pub type LPARAM = LONG_PTR;
 
 pub type LRESULT = LONG_PTR;
 
-pub type LPCWSTR   = *const u16;
-pub type LPWSTR   =  *mut   u16;
+pub type LPCWSTR = *const u16;
+pub type LPCSTR  = *const c_char;
+pub type LPWSTR  = *mut   u16;
 
 pub enum OpaqueFunction {}
 pub type PROC = *mut OpaqueFunction;
