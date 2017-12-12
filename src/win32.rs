@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use std;
-use std::os::raw::c_char;
+use std::os::raw::{c_char, c_void};
 use libc;
 use widestring::WideCString;
 
@@ -33,8 +33,8 @@ pub const PFD_SUPPORT_OPENGL  : u32 = 0x00000020;
 
 pub const COLOR_WINDOW : u32 = 5;
 
-pub type VOID      = std::os::raw::c_void;
-pub type LPVOID    = *mut std::os::raw::c_void;
+pub type VOID      = c_void;
+pub type LPVOID    = *mut c_void;
 pub type PVOID     = LPVOID;
 pub type HANDLE    = PVOID;
 pub type HWND      = HANDLE;
@@ -221,6 +221,8 @@ impl Default for PIXELFORMATDESCRIPTOR {
 
 #[link(name = "user32")]
 extern  {
+    pub fn OutputDebugStringW( lpOutputString : LPCWSTR) -> c_void;
+
     pub fn CreateWindowExW(
         dwExStyle    : DWORD,
         lpClassName  : LPCWSTR,

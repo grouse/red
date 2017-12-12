@@ -1,3 +1,4 @@
+#![windows_subsystem = "windows"]
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
@@ -11,6 +12,9 @@ mod win32;
 #[macro_use]
 mod wgl;
 mod gl;
+
+#[macro_use]
+mod log;
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -176,12 +180,12 @@ fn main()
             gl::GetIntegerv(gl::MAJOR_VERSION, &mut major);
             gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
 
-            println!("OpenGL version {}.{}", major, minor);
+            log!(log::Type::Debug, "OpenGL version {}.{}", major, minor);
         }
 
     }
 
-    println!("hello world!");
+    log!(log::Type::Debug, "hello world!");
 
     loop {
         let mut msg;
