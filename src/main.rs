@@ -205,7 +205,7 @@ fn main()
                 wgl::CONTEXT_MAJOR_VERSION_ARB, 4,
                 wgl::CONTEXT_MINOR_VERSION_ARB, 3,
                 wgl::CONTEXT_FLAGS_ARB, wgl::CONTEXT_DEBUG_BIT_ARB,
-                //wgl::CONTEXT_PROFILE_MASK_ARB, wgl::CONTEXT_CORE_PROFILE_BIT_ARB,
+                wgl::CONTEXT_PROFILE_MASK_ARB, wgl::CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
                 0
             ];
 
