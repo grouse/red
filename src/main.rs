@@ -7,6 +7,9 @@ extern crate libc;
 extern crate widestring;
 
 use std::ptr::null_mut;
+use std::os::raw::c_void;
+use std::ffi::CString;
+use std::ffi::CStr;
 
 mod win32;
 #[macro_use]
@@ -15,6 +18,30 @@ mod gl;
 
 #[macro_use]
 mod log;
+
+pub fn check_gl_error()
+{
+    unsafe {
+        let mut err = gl::GetError();
+        while err != gl::NO_ERROR {
+            log!(log::Type::Error, "OpenGL error: {}", err);
+            err = gl::GetError();
+        }
+    }
+}
+
+pub unsafe extern fn gl_debug_callback(
+    source    : gl::GLenum,
+    dbg_type  : gl::GLenum,
+    id        : gl::GLuint,
+    severity  : gl::GLenum,
+    length    : gl::GLsizei,
+    message   : *const gl::GLchar,
+    userParam : *const c_void)
+{
+    let cstr = CStr::from_ptr(message);
+    log!(log::Type::Debug, "OpenGL debug message: {}", cstr.to_str().unwrap());
+}
 
 pub unsafe extern fn window_proc(
     hwnd   : win32::HWND,
@@ -125,6 +152,10 @@ fn main()
             "wglCreateContextAttribsARB",
             wgl::CreateContextAttribsARB_t);
 
+        gl::DebugMessageCallback = wglGetProcAddress!(
+            "glDebugMessageCallback",
+            gl::DebugMessageCallback_t);
+
         let attributes = [
             wgl::DRAW_TO_WINDOW_ARB, gl::TRUE,
             wgl::SUPPORT_OPENGL_ARB, gl::TRUE,
@@ -171,8 +202,8 @@ fn main()
             assert!(result != win32::FALSE);
 
             let attributes = [
-                wgl::CONTEXT_MAJOR_VERSION_ARB, 3,
-                wgl::CONTEXT_MINOR_VERSION_ARB, 2,
+                wgl::CONTEXT_MAJOR_VERSION_ARB, 4,
+                wgl::CONTEXT_MINOR_VERSION_ARB, 3,
                 wgl::CONTEXT_FLAGS_ARB, wgl::CONTEXT_DEBUG_BIT_ARB,
                 //wgl::CONTEXT_PROFILE_MASK_ARB, wgl::CONTEXT_CORE_PROFILE_BIT_ARB,
                 0
@@ -192,6 +223,11 @@ fn main()
             gl::GetIntegerv(gl::MINOR_VERSION, &mut minor);
 
             log!(log::Type::Debug, "OpenGL version {}.{}", major, minor);
+
+            gl::Enable(gl::DEBUG_OUTPUT);
+            gl::DebugMessageCallback(gl_debug_callback, null_mut());
+
+            gl::ClearColor( 0.0, 0.0, 0.0, 0.0 );
         }
 
     }
@@ -209,6 +245,21 @@ fn main()
                 win32::TranslateMessage(&mut msg);
                 win32::DispatchMessageW(&mut msg);
             }
+
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+            gl::LoadIdentity();
+
+            gl::Color3f( 1.0, 0.0, 0.0 );
+
+            gl::Begin(gl::TRIANGLES);
+                gl::Vertex3f(-0.5, -0.5, 0.0);
+                gl::Vertex3f( 0.0,  0.5, 0.0);
+                gl::Vertex3f( 0.5, -0.5, 0.0);
+            gl::End();
+
+            check_gl_error();
+
+            win32::SwapBuffers(hdc);
         }
     }
 }

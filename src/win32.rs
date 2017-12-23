@@ -278,4 +278,6 @@ extern {
        hdc : HDC,
        iPixelFormat : INT,
        ppfd : *const PIXELFORMATDESCRIPTOR) -> BOOL;
+
+   pub fn SwapBuffers(hdc : HDC) -> BOOL;
 }
