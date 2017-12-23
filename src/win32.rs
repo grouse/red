@@ -14,9 +14,13 @@ pub const WS_SYSMENU     : u32 = 0x00080000;
 pub const PM_REMOVE : u32 = 0x0001;
 
 pub const WM_DESTROY : u32 = 0x0002;
-pub const WM_QUIT    : u32 = 0x0012;
 pub const WM_CLOSE   : u32 = 0x0010;
+pub const WM_QUIT    : u32 = 0x0012;
+pub const WM_KEYDOWN : u32 = 0x0100;
 pub const WM_PAINT   : u32 = 0x0F;
+
+// virtual key codes
+pub const VK_ESCAPE : WPARAM = 0x1B;
 
 pub const CS_VREDRAW : u32 = 0x0001;
 pub const CS_HREDRAW : u32 = 0x0002;

@@ -23,8 +23,8 @@ pub unsafe extern fn window_proc(
     lparam : win32::LPARAM) -> win32::LRESULT
 {
     match msg {
-        win32::WM_QUIT => std::process::exit(0),
-        win32::WM_CLOSE => std::process::exit(0),
+        win32::WM_QUIT => quit(),
+        win32::WM_CLOSE => quit(),
         win32::WM_DESTROY => {
             win32::PostQuitMessage(0);
         }
@@ -39,10 +39,21 @@ pub unsafe extern fn window_proc(
 
             win32::EndPaint(hwnd, &ps);
         }
+        win32::WM_KEYDOWN => {
+            match wparam {
+                win32::VK_ESCAPE => quit(),
+                _ => log!(log::Type::Warning, "unhandled key code: {}", wparam)
+            }
+        }
         _ => return win32::DefWindowProcW(hwnd, msg, wparam, lparam)
     }
 
     return 0;
+}
+
+fn quit()
+{
+    std::process::exit(0);
 }
 
 
